@@ -992,6 +992,7 @@ function observe (value, asRootData) {
 
 /**
  * Define a reactive property on an Object.
+ * 在对象上定义响应属性
  */
 function defineReactive$$1 (
   obj,
@@ -1065,11 +1066,13 @@ function set (target, key, val) {
   ) {
     warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
   }
+  // 是否是数组，指向数组
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key);
     target.splice(key, 1, val);
     return val
   }
+  // 是否不是第一次定义该属性
   if (key in target && !(key in Object.prototype)) {
     target[key] = val;
     return val
@@ -1082,10 +1085,12 @@ function set (target, key, val) {
     );
     return val
   }
+  // 对象之前没有被监听到
   if (!ob) {
     target[key] = val;
     return val
   }
+  // 对新属性进行监听订阅
   defineReactive$$1(ob.value, key, val);
   ob.dep.notify();
   return val
@@ -1889,7 +1894,7 @@ function logError (err, vm, info) {
 }
 
 /*  */
-
+// ! callbacks 是异步队列
 var callbacks = [];
 var pending = false;
 
@@ -1922,6 +1927,9 @@ var timerFunc;
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
 /* istanbul ignore next, $flow-disable-line */
+
+// ! timerFunc 是以 promise、MutationObserver、setImmediate、setTimeout 的顺序 注册异步任务
+// ! 这些都是 处理异步的，只不过为了适配 IE 以及 IOS 等等
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   var p = Promise.resolve();
   timerFunc = function () {
@@ -1967,6 +1975,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 
 function nextTick (cb, ctx) {
   var _resolve;
+  // ! 加入异步队列
   callbacks.push(function () {
     if (cb) {
       try {
